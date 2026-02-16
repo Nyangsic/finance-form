@@ -293,7 +293,37 @@ body {
 </head>
 <body>
 
-<div id="formView">
+<div id="fcSearchView" style="max-width:480px; margin:0 auto;">
+  <div class="header">
+    <div class="header-badge">ROYAL TEAM · 정식</div>
+    <h1>맞춤 재무설계 상세 입력</h1>
+    <p>먼저 담당 FC를 확인해주세요</p>
+  </div>
+  <div style="padding:1.5rem;">
+    <div class="section">
+      <div class="section-title"><span class="section-num">✦</span>담당 FC 확인</div>
+      <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:1rem;">담당 재무설계사(FC) 이름을 입력해주세요.</p>
+      <div class="row">
+        <div class="field" style="flex:1;">
+          <label>FC 이름 <span class="req">*</span></label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="fcNameInput" placeholder="이름 입력" style="flex:1; padding:0.65rem 0.8rem; border:1px solid var(--border); border-radius:0.5rem; font-size:0.9rem;">
+            <button type="button" id="fcSearchBtn" style="padding:0.6rem 1.2rem; background:var(--gold); color:#fff; border:none; border-radius:0.5rem; font-size:0.85rem; font-weight:500; cursor:pointer; white-space:nowrap;">검색</button>
+          </div>
+        </div>
+      </div>
+      <div id="fcSearchResult" style="margin-top:1rem; display:none;"></div>
+      <div id="fcConfirmed" style="margin-top:1rem; display:none; padding:0.8rem 1rem; background:#F0EDE8; border-radius:0.5rem;">
+        <span style="font-size:0.85rem; color:var(--gold-dark); font-weight:500;" id="fcConfirmedText"></span>
+        <input type="hidden" id="fcId" value="">
+        <input type="hidden" id="fcNameVal" value="">
+      </div>
+      <button type="button" id="fcNextBtn" disabled style="margin-top:1.5rem; width:100%; padding:0.9rem; background:var(--gold); color:#fff; border:none; border-radius:0.6rem; font-size:0.95rem; font-weight:600; cursor:pointer; opacity:0.4; transition:opacity 0.3s;">정보 입력 시작 →</button>
+    </div>
+  </div>
+</div>
+
+<div id="formView" style="display:none;">
   <div class="header">
     <div class="header-badge">ROYAL TEAM · 정식</div>
     <h1>맞춤 재무설계 상세 입력</h1>
@@ -904,7 +934,7 @@ body {
           <div class="field"><label>상담일시</label>
             <input type="text" name="consult_date" placeholder="2026.02.17"></div>
           <div class="field"><label>담당 FC</label>
-            <input type="text" name="fc_name" placeholder="박설계"></div>
+            <input type="text" name="fc_name" id="fcNameField" readonly style="background:#F0EDE8; cursor:not-allowed;"></div>
         </div>
       </div>
 
@@ -935,6 +965,84 @@ body {
 // Google Apps Script 웹앱 URL
 // ============================================================
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsgKgSGktuF9sK0GSQQU0MPW8bGGgFPAckPtDxzlPS6rzE_yoxQYBncyZ2LFDOir_pHw/exec';
+
+// ============================================================
+// FC 검색 로직
+// ============================================================
+const fcNameInput = document.getElementById('fcNameInput');
+const fcSearchBtn = document.getElementById('fcSearchBtn');
+const fcSearchResult = document.getElementById('fcSearchResult');
+const fcConfirmed = document.getElementById('fcConfirmed');
+const fcNextBtn = document.getElementById('fcNextBtn');
+
+let selectedFC = null;
+
+fcSearchBtn.addEventListener('click', searchFC);
+fcNameInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); searchFC(); }
+});
+
+async function searchFC() {
+  const name = fcNameInput.value.trim();
+  if (!name) { alert('이름을 입력해주세요.'); fcNameInput.focus(); return; }
+
+  fcSearchBtn.disabled = true;
+  fcSearchBtn.textContent = '검색 중...';
+  fcSearchResult.style.display = 'none';
+  fcConfirmed.style.display = 'none';
+  selectedFC = null;
+  fcNextBtn.disabled = true;
+  fcNextBtn.style.opacity = '0.4';
+
+  try {
+    const url = SCRIPT_URL + '?action=searchFC&name=' + encodeURIComponent(name);
+    const res = await fetch(url);
+    const json = await res.json();
+
+    if (json.status === 'ok' && json.results && json.results.length > 0) {
+      if (json.results.length === 1) {
+        confirmFC(json.results[0]);
+      } else {
+        let html = '<p style="font-size:0.85rem; color:var(--text); margin-bottom:0.5rem;">검색 결과 ' + json.results.length + '명:</p>';
+        json.results.forEach(fc => {
+          html += '<button type="button" class="fc-pick-btn" onclick=\'confirmFC(' + JSON.stringify(fc).replace(/'/g,"&#39;") + ')\''
+            + ' style="display:block; width:100%; text-align:left; padding:0.7rem 1rem; margin-bottom:0.4rem; background:#F7F5F2; border:1px solid #E8E4DF; border-radius:0.5rem; cursor:pointer; font-size:0.85rem;">'
+            + fc.name + ' <span style="color:#8C8680;">(' + fc.branch + ')</span></button>';
+        });
+        fcSearchResult.innerHTML = html;
+        fcSearchResult.style.display = 'block';
+      }
+    } else {
+      fcSearchResult.innerHTML = '<p style="color:#C75C5C; font-size:0.85rem;">해당 이름의 FC를 찾을 수 없습니다.</p>';
+      fcSearchResult.style.display = 'block';
+    }
+  } catch (err) {
+    fcSearchResult.innerHTML = '<p style="color:#C75C5C; font-size:0.85rem;">검색 중 오류가 발생했습니다. 다시 시도해주세요.</p>';
+    fcSearchResult.style.display = 'block';
+  }
+  fcSearchBtn.disabled = false;
+  fcSearchBtn.textContent = '검색';
+}
+
+function confirmFC(fc) {
+  selectedFC = fc;
+  fcSearchResult.style.display = 'none';
+  fcConfirmed.style.display = 'block';
+  document.getElementById('fcConfirmedText').textContent = '✓ ' + fc.name + ' (' + fc.branch + ')';
+  document.getElementById('fcId').value = fc.id;
+  document.getElementById('fcNameVal').value = fc.name;
+  fcNextBtn.disabled = false;
+  fcNextBtn.style.opacity = '1';
+}
+
+fcNextBtn.addEventListener('click', function() {
+  if (!selectedFC) return;
+  document.getElementById('fcSearchView').style.display = 'none';
+  document.getElementById('formView').style.display = 'block';
+  // Step 8의 담당 FC 필드 자동 채우기
+  const fcField = document.getElementById('fcNameField');
+  if (fcField) fcField.value = selectedFC.name;
+});
 
 // ============================================================
 // 스텝 네비게이션
@@ -1031,6 +1139,7 @@ async function submitForm() {
     if (el.name) data[el.name] = el.value.replace(/,/g, '').trim();
   });
   data.timestamp = new Date().toLocaleString('ko-KR');
+  data.fc_id = document.getElementById('fcId').value;
 
   try {
     if (!SCRIPT_URL) {
