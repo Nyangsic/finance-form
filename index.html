@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>재무설계 간편 정보 입력</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #8B7355;
+  --gold-light: #B8A088;
+  --gold-dark: #6B5740;
+  --bg: #FAFAF8;
+  --card: #FFFFFF;
+  --text: #2D2A26;
+  --text-sub: #8C8680;
+  --border: #E8E4DF;
+  --input-bg: #F7F5F2;
+  --input-focus: #FDF8F3;
+  --accent: #D4A574;
+  --success: #6B8F5E;
+  --error: #C75C5C;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 헤더 */
+.header {
+  background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 50%, var(--accent) 100%);
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.08) 0%, transparent 50%);
+}
+.header-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 2rem;
+  padding: 0.35rem 1.2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255,255,255,0.9);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+.header h1 {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+  position: relative;
+}
+.header p {
+  color: rgba(255,255,255,0.75);
+  font-size: 0.85rem;
+  font-weight: 300;
+  position: relative;
+}
+
+/* 진행률 */
+.progress-wrap {
+  padding: 1rem 1.5rem 0;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.progress-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.progress-text {
+  text-align: right;
+  font-size: 0.7rem;
+  color: var(--text-sub);
+  margin-top: 0.3rem;
+}
+
+/* 컨테이너 */
+.container {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem 3rem;
+}
+
+/* 섹션 */
+.section {
+  background: var(--card);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  animation: fadeUp 0.3s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  background: var(--gold);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-right: 0.5rem;
+  flex-shrink: 0;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1.2rem;
+}
+
+/* 입력 필드 */
+.field {
+  margin-bottom: 1rem;
+}
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-sub);
+  margin-bottom: 0.35rem;
+}
+.field label .required {
+  color: var(--error);
+  margin-left: 2px;
+}
+.field input, .field select, .field textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--input-bg);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  transition: all 0.2s;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--gold);
+  background: var(--input-focus);
+  box-shadow: 0 0 0 3px rgba(139,115,85,0.08);
+}
+.field input::placeholder { color: var(--text-sub); font-weight: 300; }
+.field textarea { resize: none; min-height: 60px; }
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%238C8680' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+/* 금액 입력 (단위 포함) */
+.input-unit {
+  position: relative;
+}
+.input-unit input {
+  padding-right: 3rem;
+}
+.input-unit .unit {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  color: var(--text-sub);
+  pointer-events: none;
+}
+
+/* 2열 레이아웃 */
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* 자녀 추가 */
+.child-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: var(--input-bg);
+  border-radius: 10px;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+.child-row .child-label {
+  position: absolute;
+  top: -0.5rem;
+  left: 0.75rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--gold);
+  background: var(--card);
+  padding: 0 0.3rem;
+}
+.child-row input {
+  background: var(--card);
+}
+
+/* 제출 버튼 */
+.submit-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px rgba(139,115,85,0.25);
+  margin-top: 0.5rem;
+}
+.submit-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(139,115,85,0.35);
+}
+.submit-btn:active {
+  transform: translateY(0);
+}
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+.submit-btn .spinner {
+  display: inline-block;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 0.5rem;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* 하단 안내 */
+.footer-note {
+  text-align: center;
+  padding: 1rem 1.5rem 2rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.footer-note p {
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  line-height: 1.7;
+}
+
+/* 완료 화면 */
+.done-screen {
+  display: none;
+  text-align: center;
+  padding: 4rem 2rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+.done-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--success), #7DA66E);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275);
+}
+@keyframes popIn {
+  0% { transform: scale(0); }
+  100% { transform: scale(1); }
+}
+.done-icon svg {
+  width: 40px; height: 40px;
+  stroke: #fff;
+  stroke-width: 3;
+  fill: none;
+}
+.done-screen h2 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+.done-screen p {
+  font-size: 0.9rem;
+  color: var(--text-sub);
+  line-height: 1.7;
+}
+
+/* 에러 메시지 */
+.error-msg {
+  display: none;
+  background: #FFF5F5;
+  border: 1px solid #F5D0D0;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.8rem;
+  color: var(--error);
+}
+</style>
+</head>
+<body>
+
+<div id="formView">
+  <div class="header">
+    <div class="header-badge">ROYAL TEAM</div>
+    <h1>맞춤 재무설계 정보 입력</h1>
+    <p>5분이면 충분합니다</p>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-text" id="progressText">0 / 7</div>
+  </div>
+
+  <form id="mainForm" class="container" autocomplete="off">
+
+    <div id="errorMsg" class="error-msg"></div>
+
+    <!-- 1. 기본 인적사항 -->
+    <div class="section" data-section="1">
+      <div class="section-title"><span class="section-num">1</span>기본 인적사항</div>
+      <div class="row">
+        <div class="field">
+          <label>성명 <span class="required">*</span></label>
+          <input type="text" name="name" placeholder="홍길동" required>
+        </div>
+        <div class="field">
+          <label>생년월일 <span class="required">*</span></label>
+          <input type="text" name="birth" placeholder="1985.03.15" inputmode="numeric">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>직업 / 직장</label>
+          <input type="text" name="job" placeholder="삼성전자 과장">
+        </div>
+        <div class="field">
+          <label>연락처</label>
+          <input type="tel" name="phone" placeholder="010-1234-5678">
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 가족 구성 -->
+    <div class="section" data-section="2">
+      <div class="section-title"><span class="section-num">2</span>가족 구성</div>
+      <div class="row">
+        <div class="field">
+          <label>배우자 성명</label>
+          <input type="text" name="spouse_name" placeholder="김영희">
+        </div>
+        <div class="field">
+          <label>배우자 나이</label>
+          <input type="text" name="spouse_age" placeholder="38" inputmode="numeric">
+        </div>
+      </div>
+      <div class="child-row">
+        <span class="child-label">자녀 1</span>
+        <div class="field">
+          <label>이름</label>
+          <input type="text" name="child1_name" placeholder="홍민준">
+        </div>
+        <div class="field">
+          <label>나이</label>
+          <input type="text" name="child1_age" placeholder="12" inputmode="numeric">
+        </div>
+      </div>
+      <div class="child-row">
+        <span class="child-label">자녀 2</span>
+        <div class="field">
+          <label>이름</label>
+          <input type="text" name="child2_name" placeholder="">
+        </div>
+        <div class="field">
+          <label>나이</label>
+          <input type="text" name="child2_age" placeholder="" inputmode="numeric">
+        </div>
+      </div>
+      <div class="child-row">
+        <span class="child-label">자녀 3</span>
+        <div class="field">
+          <label>이름</label>
+          <input type="text" name="child3_name" placeholder="">
+        </div>
+        <div class="field">
+          <label>나이</label>
+          <input type="text" name="child3_age" placeholder="" inputmode="numeric">
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. 소득 -->
+    <div class="section" data-section="3">
+      <div class="section-title"><span class="section-num">3</span>소득</div>
+      <div class="row">
+        <div class="field">
+          <label>월 소득 (세전)</label>
+          <div class="input-unit">
+            <input type="text" name="income" placeholder="500" inputmode="numeric">
+            <span class="unit">만원</span>
+          </div>
+        </div>
+        <div class="field">
+          <label>소득 유형</label>
+          <select name="income_type">
+            <option value="">선택</option>
+            <option value="직장인">직장인</option>
+            <option value="자영업">자영업</option>
+            <option value="프리랜서">프리랜서</option>
+            <option value="맞벌이">맞벌이</option>
+            <option value="기타">기타</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 저축·투자 -->
+    <div class="section" data-section="4">
+      <div class="section-title"><span class="section-num">4</span>저축 · 투자</div>
+      <div class="field">
+        <label>월 저축/투자 금액</label>
+        <div class="input-unit">
+          <input type="text" name="saving" placeholder="100" inputmode="numeric">
+          <span class="unit">만원</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>저축/투자 방법</label>
+        <input type="text" name="saving_method" placeholder="예: 예적금, 펀드, 주식, 연금 등">
+      </div>
+    </div>
+
+    <!-- 5. 대출 -->
+    <div class="section" data-section="5">
+      <div class="section-title"><span class="section-num">5</span>대출</div>
+      <div class="field">
+        <label>대출 잔액 (합계)</label>
+        <div class="input-unit">
+          <input type="text" name="loan" placeholder="20000" inputmode="numeric">
+          <span class="unit">만원</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>대출 종류</label>
+        <input type="text" name="loan_type" placeholder="예: 주담대, 신용대출, 전세대출 등">
+      </div>
+    </div>
+
+    <!-- 6. 보유 자산 -->
+    <div class="section" data-section="6">
+      <div class="section-title"><span class="section-num">6</span>보유 자산 (대략)</div>
+      <div class="field">
+        <label>예·적금</label>
+        <div class="input-unit">
+          <input type="text" name="deposit" placeholder="5000" inputmode="numeric">
+          <span class="unit">만원</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>부동산 (시세)</label>
+        <div class="input-unit">
+          <input type="text" name="realestate" placeholder="40000" inputmode="numeric">
+          <span class="unit">만원</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>기타 (주식, 펀드 등)</label>
+        <div class="input-unit">
+          <input type="text" name="other_asset" placeholder="3000" inputmode="numeric">
+          <span class="unit">만원</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7. 은퇴·연금 -->
+    <div class="section" data-section="7">
+      <div class="section-title"><span class="section-num">7</span>은퇴 · 연금</div>
+      <div class="field">
+        <label>은퇴 희망 나이</label>
+        <div class="input-unit">
+          <input type="text" name="retire_age" placeholder="60" inputmode="numeric">
+          <span class="unit">세</span>
+        </div>
+      </div>
+      <div class="field">
+        <label>공적연금</label>
+        <input type="text" name="public_pension" placeholder="예: 국민연금, 공무원연금, 군인연금 등">
+      </div>
+      <div class="field">
+        <label>개인연금 / 퇴직연금</label>
+        <input type="text" name="private_pension" placeholder="예: IRP 월 20만원, 연금저축 월 30만원">
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">제출하기</button>
+  </form>
+
+  <div class="footer-note">
+    <p>※ 정확한 금액이 아니어도 괜찮습니다.<br>대략적인 규모만 알려주셔도 맞춤 설계가 가능합니다.</p>
+    <p style="margin-top:0.5rem;">※ 작성해주신 정보는 재무설계 목적으로만 활용되며,<br>외부에 공유되지 않습니다.</p>
+  </div>
+</div>
+
+<!-- 완료 화면 -->
+<div id="doneView" class="done-screen">
+  <div class="done-icon">
+    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+  </div>
+  <h2>제출 완료!</h2>
+  <p>소중한 정보 감사합니다.<br>맞춤 재무설계를 준비하여<br>빠르게 연락드리겠습니다.</p>
+</div>
+
+<script>
+// ============================================================
+// Google Apps Script 웹앱 URL (설정 필요)
+// ============================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwsgKgSGktuF9sK0GSQQU0MPW8bGGgFPAckPtDxzlPS6rzE_yoxQYBncyZ2LFDOir_pHw/exec';
+
+// ============================================================
+// 진행률 바
+// ============================================================
+const form = document.getElementById('mainForm');
+const sections = form.querySelectorAll('.section');
+const progressFill = document.getElementById('progressFill');
+const progressText = document.getElementById('progressText');
+const totalSections = sections.length;
+
+function updateProgress() {
+  let filled = 0;
+  sections.forEach(sec => {
+    const inputs = sec.querySelectorAll('input, select, textarea');
+    let hasFilled = false;
+    inputs.forEach(inp => {
+      if (inp.value.trim()) hasFilled = true;
+    });
+    if (hasFilled) filled++;
+  });
+  const pct = Math.round((filled / totalSections) * 100);
+  progressFill.style.width = pct + '%';
+  progressText.textContent = filled + ' / ' + totalSections;
+}
+
+form.addEventListener('input', updateProgress);
+
+// ============================================================
+// 숫자 입력 자동 콤마
+// ============================================================
+document.querySelectorAll('.input-unit input').forEach(input => {
+  input.addEventListener('input', function() {
+    let v = this.value.replace(/[^0-9]/g, '');
+    if (v) {
+      this.value = Number(v).toLocaleString();
+    }
+  });
+});
+
+// ============================================================
+// 전화번호 자동 하이픈
+// ============================================================
+const phoneInput = form.querySelector('[name="phone"]');
+if (phoneInput) {
+  phoneInput.addEventListener('input', function() {
+    let v = this.value.replace(/[^0-9]/g, '');
+    if (v.length > 3 && v.length <= 7) {
+      v = v.slice(0,3) + '-' + v.slice(3);
+    } else if (v.length > 7) {
+      v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7,11);
+    }
+    this.value = v;
+  });
+}
+
+// ============================================================
+// 생년월일 자동 점
+// ============================================================
+const birthInput = form.querySelector('[name="birth"]');
+if (birthInput) {
+  birthInput.addEventListener('input', function() {
+    let v = this.value.replace(/[^0-9]/g, '');
+    if (v.length > 4 && v.length <= 6) {
+      v = v.slice(0,4) + '.' + v.slice(4);
+    } else if (v.length > 6) {
+      v = v.slice(0,4) + '.' + v.slice(4,6) + '.' + v.slice(6,8);
+    }
+    this.value = v;
+  });
+}
+
+// ============================================================
+// 제출
+// ============================================================
+form.addEventListener('submit', async function(e) {
+  e.preventDefault();
+
+  const errorMsg = document.getElementById('errorMsg');
+  errorMsg.style.display = 'none';
+
+  // 필수 입력 확인
+  const name = form.querySelector('[name="name"]').value.trim();
+  if (!name) {
+    errorMsg.textContent = '성명을 입력해주세요.';
+    errorMsg.style.display = 'block';
+    form.querySelector('[name="name"]').focus();
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>제출 중...';
+
+  // 폼 데이터 수집
+  const data = {};
+  new FormData(form).forEach((v, k) => {
+    // 콤마 제거 (숫자 필드)
+    data[k] = v.replace(/,/g, '');
+  });
+  data.timestamp = new Date().toLocaleString('ko-KR');
+
+  try {
+    if (!SCRIPT_URL) {
+      // Apps Script URL 미설정 시 로컬 테스트
+      console.log('제출 데이터:', data);
+      alert('테스트 모드: SCRIPT_URL이 설정되지 않았습니다.\n콘솔에서 데이터를 확인하세요.');
+      btn.disabled = false;
+      btn.innerHTML = '제출하기';
+      return;
+    }
+
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+
+    // 완료 화면
+    document.getElementById('formView').style.display = 'none';
+    document.getElementById('doneView').style.display = 'block';
+    window.scrollTo(0, 0);
+
+  } catch (err) {
+    errorMsg.textContent = '전송 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    errorMsg.style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '제출하기';
+  }
+});
+</script>
+</body>
+</html>
